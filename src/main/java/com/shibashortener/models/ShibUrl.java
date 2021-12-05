@@ -1,9 +1,12 @@
 package com.shibashortener.models;
 
-import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@RedisHash("shiburl")
+@Document(collection = "urls")
 public class ShibUrl {
+
+    @Id
     private String id;
     private String shortenedUrl;
     private String longUrl;
