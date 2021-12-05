@@ -7,6 +7,10 @@ public class DailyStats implements Serializable {
     private String date;
     private long visits = 0;
 
+    public DailyStats(String date) {
+        this.date = date;
+    }
+
     public void incrementVisits() {this.visits++;}
 
     public String getDate() {

@@ -3,6 +3,7 @@ package com.shibashortener.rest;
 
 import com.shibashortener.models.LongUrlBean;
 import com.shibashortener.models.ShibUrl;
+import com.shibashortener.service.AnalyticsService;
 import com.shibashortener.service.CacheService;
 import com.shibashortener.service.KeyGenService;
 import com.shibashortener.service.ShibUrlDbService;
@@ -16,7 +17,6 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/api/v1")
 public class ShibaShortenerRestController {
 
     @Autowired
@@ -28,8 +28,11 @@ public class ShibaShortenerRestController {
     @Autowired
     private KeyGenService keyGenService;
 
+    @Autowired
+    private AnalyticsService analyticsService;
+
     private static final int EXPIRATION_TIME_LIMIT = 6; //Months
-    final String  baseURL = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString(); //server url
+
 
     @GetMapping(path = "/itworks")
     public String itWorks(@RequestHeader("User-Agent") String user){
@@ -37,55 +40,59 @@ public class ShibaShortenerRestController {
     }
 
 
-    @GetMapping(path = "/recieve/{shortUrl}")
+    @GetMapping(path = "/{shortUrl}")
     public void recieveLongString(@PathVariable String shortUrl,
+                                    @RequestHeader("User-Agent") String userAgent,
                                     HttpServletRequest request,
                                     HttpServletResponse response) {
 
+        final String  baseURL = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString(); //server url
+
         //TODO chain of responsability: shortUrl->sanitization->validation
 
+
+        //TODO: remove boilerplate
         if(cacheService.verifyKeyInCache(shortUrl)) {
 
             ShibUrl obj = cacheService.getShibUrlFromCache(shortUrl);
 
-            //TODO: run analytics service over object
+            analyticsService.analize(request, userAgent, obj, false);
 
             redirectTo(obj.getLongUrl(), response);
 
-
         }else {
 
-            ShibUrl url = shibUrlDbService.read(shortUrl);
+            ShibUrl urlStoredInDb = shibUrlDbService.read(shortUrl);
 
-            if(url != null){
-                redirectTo(url.getLongUrl(), response);
-
-                cacheService.putUrlInCache(url.getId(), url); //update cache
+            if(urlStoredInDb != null){
+                redirectTo(urlStoredInDb.getLongUrl(), response);
+                cacheService.putUrlInCache(urlStoredInDb.getId(), urlStoredInDb); //update cache
+                analyticsService.analize(request, userAgent, urlStoredInDb, false);
 
             }else  {
 
-                    response.setHeader("Location", baseURL+"/not-found");
+                    response.setHeader("Location", baseURL+"/shib/not-found");
                     response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 
             }
-
         }
     }
 
     @PostMapping(path = "/shortening")
     public String shortening(@RequestBody LongUrlBean longURL,
                              HttpServletRequest request,
+                             @RequestHeader("User-Agent") String userAgent,
                              HttpServletResponse response) {
 
-
+        final String  baseURL = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString(); //server url
         String exptime = LocalDate.now().plusMonths(EXPIRATION_TIME_LIMIT).toString();
-
 
         //TODO: chain of responsability: shortUrl->sanitization->validation
 
         String result = generateKey(longURL.getLongUrl());
         ShibUrl shibUrl = new ShibUrl(result, baseURL+"/"+result, longURL.getLongUrl(), exptime);
-        //TODO: Run analytics
+
+        analyticsService.analize(request,userAgent ,shibUrl, true);
 
         boolean hasInsertedInCache = cacheService.putUrlInCache(result, shibUrl);
         String dbId = shibUrlDbService.create(shibUrl);
@@ -104,21 +111,28 @@ public class ShibaShortenerRestController {
 
 
     private void redirectTo(String url, HttpServletResponse response) {
-        response.setHeader("Location", url);
+        response.setHeader("Location", "http://"+url);
         response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
     }
 
 
+    /**
+     * This is an auxiliary method to generate a key recursively
+     * if one with same value already did generated
+     *
+     * @param longURL URL provided by user
+     * @return
+     */
     private String generateKey(String longURL){
 
         try {
             String key = keyGenService.encode(longURL);
 
-            if(!cacheService.verifyKeyInCache(key) || shibUrlDbService.read(key) == null) {
-                return key;
+            if(cacheService.verifyKeyInCache(key) || shibUrlDbService.read(key) != null) {
+                return  generateKey(longURL);
             }
 
-            return  generateKey(longURL);
+            return  key;
 
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();

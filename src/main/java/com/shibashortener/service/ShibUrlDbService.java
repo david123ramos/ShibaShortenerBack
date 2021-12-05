@@ -1,10 +1,8 @@
 package com.shibashortener.service;
 
-import com.shibashortener.interfaces.ShibUrlDbRepository;
+import com.shibashortener.repositories.ShibUrlDbRepository;
 import com.shibashortener.models.ShibUrl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

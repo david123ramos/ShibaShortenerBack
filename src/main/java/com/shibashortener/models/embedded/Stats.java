@@ -1,16 +1,38 @@
 package com.shibashortener.models.embedded;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Document(collection = "url_stats")
 public class Stats implements Serializable {
 
-
+    @Id
+    String id_url;
     List<DailyStats> dailyStats = new ArrayList<>();
     String browser;
-    String device;
+    String os;
+    String createdAt;
 
+
+    public Stats(String id_url, String browser, String os, String createdAt) {
+        this.id_url = id_url;
+        this.browser = browser;
+        this.os = os;
+        this.createdAt = createdAt;
+    }
+
+    public String getId() {
+        return id_url;
+    }
+
+    public void setId(String id) {
+        this.id_url = id;
+    }
 
     public String getBrowser() {
         return browser;
@@ -28,11 +50,27 @@ public class Stats implements Serializable {
         this.dailyStats = dailyStats;
     }
 
-    public String getDevice() {
-        return device;
+    public String getOs() {
+        return os;
     }
 
-    public void setDevice(String device) {
-        this.device = device;
+    public void setOs(String os) {
+        this.os = os;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void initCounter(String date){
+        this.dailyStats.add(new DailyStats(date));
+    }
+
+    public void addDailyReport(DailyStats dailyReport) {
+        this.dailyStats.add(dailyReport);
     }
 }

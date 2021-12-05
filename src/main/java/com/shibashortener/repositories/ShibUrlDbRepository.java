@@ -1,7 +1,6 @@
-package com.shibashortener.interfaces;
+package com.shibashortener.repositories;
 
 import com.shibashortener.models.ShibUrl;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
