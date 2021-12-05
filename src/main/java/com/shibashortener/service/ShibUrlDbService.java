@@ -21,7 +21,7 @@ public class ShibUrlDbService {
     }
 
     public ShibUrl read(String shibUrlId) {
-        return shibUrlRepository.findById(shibUrlId).get();
+        return shibUrlRepository.findById(shibUrlId).orElse(null);
     }
 
     public void delete(String shibUrlId){

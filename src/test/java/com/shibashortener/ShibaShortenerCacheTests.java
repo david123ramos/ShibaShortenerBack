@@ -32,6 +32,6 @@ public class ShibaShortenerCacheTests {
 
         ShibUrl s = new ShibUrl(key, shortened, longUrl, expiration);
         cacheService.putUrlInCache(key, s);
-        assertThat(cacheService.getShibLongUrl(key)).isNotNull();
+        assertThat(cacheService.getShibUrlFromCache(key)).isNotNull();
     }
 }

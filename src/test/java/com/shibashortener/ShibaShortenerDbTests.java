@@ -1,7 +1,6 @@
 package com.shibashortener;
 
 
-import com.shibashortener.interfaces.ShibUrlDbRepository;
 import com.shibashortener.models.ShibUrl;
 import com.shibashortener.service.ShibUrlDbService;
 import org.junit.jupiter.api.Test;
@@ -26,9 +25,6 @@ public class ShibaShortenerDbTests {
     String expiration = LocalDate.now() .plusMonths(EXPIRATION_TIME_LIMIT).toString();
 
     ShibUrl s = new ShibUrl(key, shortened, longUrl, expiration);
-
-
-
 
     @Test
     void createTest() {

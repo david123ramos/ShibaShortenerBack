@@ -19,7 +19,7 @@ public class CacheService {
         return redisTemplate.opsForHash().putIfAbsent(key, key, value);
     }
 
-    public ShibUrl getShibLongUrl(String key) {
+    public ShibUrl getShibUrlFromCache(String key) {
          return (ShibUrl) redisTemplate.opsForHash().get(key, key);
     }
 

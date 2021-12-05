@@ -13,10 +13,13 @@ import java.util.stream.Collectors;
 
 
 @Service
+/**
+ * Responsible to encode a long url.
+ */
 public class KeyGenService {
 
     private static final String encodeSet = "0123456789abcdefghijklmopqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ"; //base62
-    private static final int URL_LENGTH = 7; // 62 ^ 7 possibilities
+    private static final int URL_LENGTH = 7; // 62 ^ 7 possibilities - 3 trillions
     private static final Random randomGenerator = new Random();
     private static  MessageDigest cryptoGenerator;
 
