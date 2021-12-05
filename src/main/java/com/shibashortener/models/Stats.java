@@ -1,5 +1,6 @@
-package com.shibashortener.models.embedded;
+package com.shibashortener.models;
 
+import com.shibashortener.models.embedded.DailyStats;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 

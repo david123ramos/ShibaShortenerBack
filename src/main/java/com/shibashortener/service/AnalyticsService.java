@@ -2,23 +2,19 @@ package com.shibashortener.service;
 
 
 import com.shibashortener.models.ShibUrl;
-import com.shibashortener.models.embedded.Stats;
+import com.shibashortener.models.Stats;
+import com.shibashortener.models.embedded.Insight;
+import com.shibashortener.models.embedded.Visitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
 public class AnalyticsService {
 
-    //key
-    //date
-    //browser
-    //OS
-    //addClick
    @Autowired
    private ShibUrlDbService shibUrlDbService;
 
@@ -40,6 +36,7 @@ public class AnalyticsService {
         String userBrowser = getBrowser(userAgent);
         String userOs = getOs(userAgent);
         String date = LocalDateTime.now().toString();
+        String ip = request.getRemoteAddr();
 
         Stats stats = null;
 
@@ -48,7 +45,8 @@ public class AnalyticsService {
         }
 
         if(stats != null) {
-            statsService.addClick(stats, date);
+            Visitor newVisitor = new Visitor(ip, userBrowser, userOs, date);
+            statsService.addClick(stats, date, newVisitor);
         }else{
             Stats newStats = new Stats(url.getId(), userBrowser, userOs, date);
             newStats.initCounter(date);
@@ -58,8 +56,35 @@ public class AnalyticsService {
             statsService.create(newStats);
         }
 
+    }
+
+    private Insight getInsight(String shibUrl) {
+
+       Stats shibUrlStats = statsService.read(shibUrl);
+
+       if(shibUrlStats != null) {
+
+           int existingDays = shibUrlStats.getDailyStats().size();
+           int totalClicks = shibUrlStats.getDailyStats()
+                                .stream()
+                                .map(dailyStats -> dailyStats.getVisits())
+                                .mapToInt(i -> i.intValue())
+                                .sum();
+           double clicksPerDay = shibUrlStats.getDailyStats()
+                                .stream()
+                                .map(dailyStats -> dailyStats.getVisits())
+                                .mapToInt(i -> i.intValue())
+                                .average()
+                                .getAsDouble();
 
 
+
+
+
+
+       }
+
+       return null;
     }
 
 
@@ -69,37 +94,31 @@ public class AnalyticsService {
         String  user            =   userAgent.toLowerCase();
         String browser = "";
 
-        if (user.contains("msie"))
-        {
+        if (user.contains("msie")) {
             String substring=userAgent.substring(userAgent.indexOf("MSIE")).split(";")[0];
             browser=substring.split(" ")[0].replace("MSIE", "IE")+"-"+substring.split(" ")[1];
-        } else if (user.contains("safari") && user.contains("version"))
-        {
+
+        } else if (user.contains("safari") && user.contains("version")) {
             browser=(userAgent.substring(userAgent.indexOf("Safari")).split(" ")[0]).split("/")[0]+"-"+(userAgent.substring(userAgent.indexOf("Version")).split(" ")[0]).split("/")[1];
-        } else if ( user.contains("opr") || user.contains("opera"))
-        {
+
+        } else if ( user.contains("opr") || user.contains("opera")) {
             if(user.contains("opera"))
                 browser=(userAgent.substring(userAgent.indexOf("Opera")).split(" ")[0]).split("/")[0]+"-"+(userAgent.substring(userAgent.indexOf("Version")).split(" ")[0]).split("/")[1];
             else if(user.contains("opr"))
                 browser=((userAgent.substring(userAgent.indexOf("OPR")).split(" ")[0]).replace("/", "-")).replace("OPR", "Opera");
-        } else if (user.contains("chrome"))
-        {
+
+        } else if (user.contains("chrome")) {
             browser=(userAgent.substring(userAgent.indexOf("Chrome")).split(" ")[0]).replace("/", "-");
-        } else if ((user.indexOf("mozilla/7.0") > -1) || (user.indexOf("netscape6") != -1)  || (user.indexOf("mozilla/4.7") != -1) || (user.indexOf("mozilla/4.78") != -1) || (user.indexOf("mozilla/4.08") != -1) || (user.indexOf("mozilla/3") != -1) )
-        {
+        } else if ((user.indexOf("mozilla/7.0") > -1) || (user.indexOf("netscape6") != -1)  || (user.indexOf("mozilla/4.7") != -1) || (user.indexOf("mozilla/4.78") != -1) || (user.indexOf("mozilla/4.08") != -1) || (user.indexOf("mozilla/3") != -1) )  {
             browser = "Netscape-?";
 
-        } else if (user.contains("firefox"))
-        {
+        } else if (user.contains("firefox")) {
             browser=(userAgent.substring(userAgent.indexOf("Firefox")).split(" ")[0]).replace("/", "-");
-        } else if(user.contains("rv"))
-        {
+        } else if(user.contains("rv")) {
             browser="IE-" + user.substring(user.indexOf("rv") + 3, user.indexOf(")"));
-        } else
-        {
+        } else {
             browser = "UnKnown, More-Info: "+userAgent;
         }
-
 
         return browser;
     }
@@ -109,20 +128,15 @@ public class AnalyticsService {
         String  userAgent = userAgentHeader;
         String os = "";
 
-        if (userAgent.toLowerCase().indexOf("windows") >= 0 )
-        {
+        if (userAgent.toLowerCase().indexOf("windows") >= 0 ) {
             os = "Windows";
-        } else if(userAgent.toLowerCase().indexOf("mac") >= 0)
-        {
+        } else if(userAgent.toLowerCase().indexOf("mac") >= 0) {
             os = "Mac";
-        } else if(userAgent.toLowerCase().indexOf("x11") >= 0)
-        {
+        } else if(userAgent.toLowerCase().indexOf("x11") >= 0) {
             os = "Unix";
-        } else if(userAgent.toLowerCase().indexOf("android") >= 0)
-        {
+        } else if(userAgent.toLowerCase().indexOf("android") >= 0) {
             os = "Android";
-        } else if(userAgent.toLowerCase().indexOf("iphone") >= 0)
-        {
+        } else if(userAgent.toLowerCase().indexOf("iphone") >= 0) {
             os = "IPhone";
         }else{
             os = "UnKnown, More-Info: "+userAgent;

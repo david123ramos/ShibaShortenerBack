@@ -79,6 +79,7 @@ public class ShibaShortenerRestController {
     }
 
     @PostMapping(path = "/shortening")
+    @CrossOrigin
     public String shortening(@RequestBody LongUrlBean longURL,
                              HttpServletRequest request,
                              @RequestHeader("User-Agent") String userAgent,
@@ -107,6 +108,19 @@ public class ShibaShortenerRestController {
         return null;
     }
 
+
+    @GetMapping(path = "/analytics/{}")
+    public String getShortUrlStats(@PathVariable String shortUrl,
+                                   HttpServletRequest request,
+                                   HttpServletResponse response){
+
+
+
+
+
+
+        return null;
+    }
 
 
 

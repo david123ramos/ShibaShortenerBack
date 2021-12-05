@@ -1,16 +1,15 @@
 package com.shibashortener.service;
 
 
-import com.shibashortener.models.ShibUrl;
 import com.shibashortener.models.embedded.DailyStats;
-import com.shibashortener.models.embedded.Stats;
-import com.shibashortener.repositories.ShibUrlDbRepository;
+import com.shibashortener.models.Stats;
+import com.shibashortener.models.embedded.Visitor;
 import com.shibashortener.repositories.StatsUrlDbRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class StatsService {
@@ -29,14 +28,17 @@ public class StatsService {
     }
 
 
-    public void addClick(Stats stats, String date){
+    public void addClick(Stats stats, String date, Visitor newVisitor){
 
 
         if(stats != null) {
 
+            DateTimeFormatter f =  DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String dateWithNoTime = LocalDateTime.parse(date).format(f);
+
             DailyStats dailyStats = stats.getDailyStats()
                     .stream()
-                    .filter(e -> e.getDate().equals(date))
+                    .filter(e -> LocalDateTime.parse(e.getDate()).format(f).equals(dateWithNoTime))
                     .findFirst().orElse(null);
 
             if(dailyStats != null) {
@@ -45,9 +47,9 @@ public class StatsService {
                 dailyStats = new DailyStats(date);
                 stats.addDailyReport(dailyStats);
             }
+            dailyStats.addVisitor(newVisitor);
 
             statsUrlDbRepository.save(stats);
-
         }
 
     }
