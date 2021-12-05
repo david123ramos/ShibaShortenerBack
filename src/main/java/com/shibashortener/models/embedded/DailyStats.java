@@ -35,4 +35,12 @@ public class DailyStats implements Serializable {
     public void addVisitor(Visitor v){
         this.visitors.add(v);
     }
+
+    public List<Visitor> getVisitors() {
+        return visitors;
+    }
+
+    public void setVisitors(List<Visitor> visitors) {
+        this.visitors = visitors;
+    }
 }

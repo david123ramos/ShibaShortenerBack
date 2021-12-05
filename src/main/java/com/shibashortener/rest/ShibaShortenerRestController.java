@@ -3,11 +3,14 @@ package com.shibashortener.rest;
 
 import com.shibashortener.models.LongUrlBean;
 import com.shibashortener.models.ShibUrl;
+import com.shibashortener.models.embedded.Insight;
 import com.shibashortener.service.AnalyticsService;
 import com.shibashortener.service.CacheService;
 import com.shibashortener.service.KeyGenService;
 import com.shibashortener.service.ShibUrlDbService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -109,17 +112,18 @@ public class ShibaShortenerRestController {
     }
 
 
-    @GetMapping(path = "/analytics/{}")
-    public String getShortUrlStats(@PathVariable String shortUrl,
-                                   HttpServletRequest request,
-                                   HttpServletResponse response){
+    @GetMapping(path = "/analytics/{shortUrl}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Insight> getShortUrlStats(@PathVariable String shortUrl,
+                                                    HttpServletRequest request,
+                                                    HttpServletResponse response){
 
+        Insight i =  analyticsService.getInsight(shortUrl);
 
+        if(i != null) {
+            return ResponseEntity.ok(i);
+        }
 
-
-
-
-        return null;
+        return ResponseEntity.notFound().build();
     }
 
 

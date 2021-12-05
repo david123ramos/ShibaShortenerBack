@@ -3,6 +3,7 @@ package com.shibashortener.service;
 
 import com.shibashortener.models.ShibUrl;
 import com.shibashortener.models.Stats;
+import com.shibashortener.models.embedded.DailyStats;
 import com.shibashortener.models.embedded.Insight;
 import com.shibashortener.models.embedded.Visitor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,13 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AnalyticsService {
@@ -58,7 +66,7 @@ public class AnalyticsService {
 
     }
 
-    private Insight getInsight(String shibUrl) {
+    public Insight getInsight(String shibUrl) {
 
        Stats shibUrlStats = statsService.read(shibUrl);
 
@@ -70,6 +78,7 @@ public class AnalyticsService {
                                 .map(dailyStats -> dailyStats.getVisits())
                                 .mapToInt(i -> i.intValue())
                                 .sum();
+
            double clicksPerDay = shibUrlStats.getDailyStats()
                                 .stream()
                                 .map(dailyStats -> dailyStats.getVisits())
@@ -77,10 +86,47 @@ public class AnalyticsService {
                                 .average()
                                 .getAsDouble();
 
+             List<Visitor> visitors = shibUrlStats.getDailyStats()
+                    .stream()
+                    .map(el -> el.getVisitors())
+                    .flatMap(List::stream) //join all visitors from dailyStats
+                    .collect(Collectors.toList());
 
 
+            Map<String, Integer> visitorsByOs = visitors.stream()
+                    .collect(Collectors.groupingBy(v -> v.getVisitorOs())).entrySet() //grouping all visitor by OS
+                    .stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, m -> m.getValue().size()));
+
+           LocalTime initMorning = LocalTime.parse("05:00");
+           LocalTime finalAfternoon = LocalTime.parse("17:59");
 
 
+           long visitorsAtDay = visitors
+                .stream()
+                .map(e -> LocalDateTime.parse(e.getDatetime()).toLocalTime() )
+                .filter(d -> d.isAfter(initMorning) && d.isBefore(finalAfternoon))
+                .count() ;
+
+           long visitorsAtNight = visitors
+                   .stream()
+                   .map(e -> LocalDateTime.parse(e.getDatetime()).toLocalTime())
+                   .filter(d -> d.isBefore(initMorning) && d.isAfter(finalAfternoon))
+                   .count() ;
+
+           String visitorsDayPeriod = visitorsAtDay > visitorsAtNight ? "Day" : "Night";
+
+           Insight insight = new Insight(
+                   shibUrl,
+                   shibUrlStats.getCreatedAt(),
+                   existingDays,
+                   totalClicks,
+                   clicksPerDay,
+                   visitorsByOs,
+                   visitorsDayPeriod
+                   );
+
+           return  insight;
 
        }
 
