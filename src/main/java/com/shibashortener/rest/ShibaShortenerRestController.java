@@ -8,6 +8,8 @@ import com.shibashortener.service.AnalyticsService;
 import com.shibashortener.service.CacheService;
 import com.shibashortener.service.KeyGenService;
 import com.shibashortener.service.ShibUrlDbService;
+import com.shibashortener.utils.URLUtils;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -51,8 +53,10 @@ public class ShibaShortenerRestController {
 
         final String  baseURL = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString(); //server url
 
-        //TODO chain of responsability: shortUrl->sanitization->validation
-
+        if(!URLUtils.isShibShortenedUrl(shortUrl)){
+            response.setHeader("Location", baseURL+"/shib/not-found");
+            response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+        }
 
         //TODO: remove boilerplate
         if(cacheService.verifyKeyInCache(shortUrl)) {
@@ -83,18 +87,26 @@ public class ShibaShortenerRestController {
 
     @PostMapping(path = "/shortening")
     @CrossOrigin
-    public String shortening(@RequestBody LongUrlBean longURL,
+    public ResponseEntity<String> shortening(@RequestBody LongUrlBean longURL,
                              HttpServletRequest request,
                              @RequestHeader("User-Agent") String userAgent,
                              HttpServletResponse response) {
 
         final String  baseURL = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString(); //server url
         String exptime = LocalDate.now().plusMonths(EXPIRATION_TIME_LIMIT).toString();
+        String sanitizedUrl = null;
 
         //TODO: chain of responsability: shortUrl->sanitization->validation
 
-        String result = generateKey(longURL.getLongUrl());
-        ShibUrl shibUrl = new ShibUrl(result, baseURL+"/"+result, longURL.getLongUrl(), exptime);
+        if(URLUtils.isValid(longURL.getLongUrl())){
+            sanitizedUrl = URLUtils.sanitizeURL(longURL.getLongUrl());
+            sanitizedUrl = URLUtils.checkProtocol(sanitizedUrl);
+        }else {
+            return ResponseEntity.badRequest().build();
+        }
+
+        String result = generateKey(sanitizedUrl);
+        ShibUrl shibUrl = new ShibUrl(result, baseURL+"/"+result, sanitizedUrl, exptime);
 
         analyticsService.analize(request,userAgent ,shibUrl, true);
 
@@ -102,7 +114,7 @@ public class ShibaShortenerRestController {
         String dbId = shibUrlDbService.create(shibUrl);
 
         if(dbId != null && hasInsertedInCache) {
-            return baseURL+"/"+result;
+            return ResponseEntity.ok(baseURL+"/"+result);
         }
 
         response.setHeader("Location", baseURL+"/internal-error");
@@ -113,9 +125,13 @@ public class ShibaShortenerRestController {
 
 
     @GetMapping(path = "/analytics/{shortUrl}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @CrossOrigin
     public ResponseEntity<Insight> getShortUrlStats(@PathVariable String shortUrl,
                                                     HttpServletRequest request,
                                                     HttpServletResponse response){
+        if(!URLUtils.isShibShortenedUrl(shortUrl)){
+            return ResponseEntity.badRequest().build();
+        }
 
         Insight i =  analyticsService.getInsight(shortUrl);
 
@@ -129,7 +145,7 @@ public class ShibaShortenerRestController {
 
 
     private void redirectTo(String url, HttpServletResponse response) {
-        response.setHeader("Location", "http://"+url);
+        response.setHeader("Location", url);
         response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
     }
 
