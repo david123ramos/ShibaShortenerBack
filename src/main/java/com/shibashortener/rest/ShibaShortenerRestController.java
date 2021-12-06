@@ -96,8 +96,6 @@ public class ShibaShortenerRestController {
         String exptime = LocalDate.now().plusMonths(EXPIRATION_TIME_LIMIT).toString();
         String sanitizedUrl = null;
 
-        //TODO: chain of responsability: shortUrl->sanitization->validation
-
         if(URLUtils.isValid(longURL.getLongUrl())){
             sanitizedUrl = URLUtils.sanitizeURL(longURL.getLongUrl());
             sanitizedUrl = URLUtils.checkProtocol(sanitizedUrl);
@@ -174,8 +172,5 @@ public class ShibaShortenerRestController {
 
         return  null;
     }
-
-
-
 
 }
