@@ -1,12 +1,12 @@
 package com.shibashortener;
 
 import com.shibashortener.rest.ShibaShortenerRestController;
-import com.shibashortener.service.KeyGenService;
+import com.shibashortener.services.KeyGenService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import static org.assertj.core.api.Assertions.assertThat;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+
 import org.springframework.boot.web.server.LocalServerPort;
 
 import java.security.NoSuchAlgorithmException;
@@ -30,12 +30,6 @@ class ShibashortnnerApplicationTests {
     void contextLoads() {
         assertThat(shibaShortenerRestController).isNotNull();
     }
-
-//    @Test
-//    void itWorks(){
-//        assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/",
-//                String.class)).contains("Hello, World");
-//    }
 
 
     @Test

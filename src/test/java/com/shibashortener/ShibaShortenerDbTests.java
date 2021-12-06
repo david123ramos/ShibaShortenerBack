@@ -2,7 +2,7 @@ package com.shibashortener;
 
 
 import com.shibashortener.models.ShibUrl;
-import com.shibashortener.service.ShibUrlDbService;
+import com.shibashortener.services.ShibUrlDbService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

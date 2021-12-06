@@ -4,12 +4,11 @@ package com.shibashortener.rest;
 import com.shibashortener.models.LongUrlBean;
 import com.shibashortener.models.ShibUrl;
 import com.shibashortener.models.embedded.Insight;
-import com.shibashortener.service.AnalyticsService;
-import com.shibashortener.service.CacheService;
-import com.shibashortener.service.KeyGenService;
-import com.shibashortener.service.ShibUrlDbService;
+import com.shibashortener.services.AnalyticsService;
+import com.shibashortener.services.CacheService;
+import com.shibashortener.services.KeyGenService;
+import com.shibashortener.services.ShibUrlDbService;
 import com.shibashortener.utils.URLUtils;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -141,7 +140,11 @@ public class ShibaShortenerRestController {
     }
 
 
-
+    /**
+     * Auxiliary method to redirect user for site with long URL.
+     * @param url
+     * @param response
+     */
     private void redirectTo(String url, HttpServletResponse response) {
         response.setHeader("Location", url);
         response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);

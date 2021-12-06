@@ -1,7 +1,7 @@
 package com.shibashortener;
 
 import com.shibashortener.models.ShibUrl;
-import com.shibashortener.service.CacheService;
+import com.shibashortener.services.CacheService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,4 +1,4 @@
-package com.shibashortener.service;
+package com.shibashortener.services;
 
 import com.shibashortener.models.ShibUrl;
 import org.springframework.beans.factory.annotation.Autowired;

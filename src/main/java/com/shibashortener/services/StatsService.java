@@ -1,4 +1,4 @@
-package com.shibashortener.service;
+package com.shibashortener.services;
 
 
 import com.shibashortener.models.embedded.DailyStats;
