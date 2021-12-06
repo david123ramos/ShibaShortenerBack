@@ -3,8 +3,10 @@ package com.shibashortener.models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
+
 @Document(collection = "urls")
-public class ShibUrl {
+public class ShibUrl implements Serializable {
 
     @Id
     private String id;
