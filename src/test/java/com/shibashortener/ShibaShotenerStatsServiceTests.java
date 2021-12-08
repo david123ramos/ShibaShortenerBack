@@ -131,8 +131,8 @@ public class ShibaShotenerStatsServiceTests {
 
         assertThat(insight)
                 .extracting("existingDays")
-                .as("existignDays should be equal to %s", updateStatsFromDb.getDailyStats().size())
-                .isEqualTo(updateStatsFromDb.getDailyStats().size());
+                .as("existignDays should be equal to %s", 1)
+                .isEqualTo(1);
     }
 
 
