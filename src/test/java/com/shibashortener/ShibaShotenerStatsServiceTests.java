@@ -117,7 +117,7 @@ public class ShibaShotenerStatsServiceTests {
         }
 
         Insight insight = analyticsService.getInsight(urlId);
-        Stats updateStatsFromDb = statsService.read(responseId);
+        //Stats updateStatsFromDb = statsService.read(responseId);
 
         assertThat(insight).isNotNull()
                 .extracting("id")
