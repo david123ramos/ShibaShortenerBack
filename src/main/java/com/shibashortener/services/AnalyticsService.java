@@ -71,7 +71,7 @@ public class AnalyticsService {
 
            int existingDays = Period.between(LocalDateTime.parse(shibUrlStats.getCreatedAt()).toLocalDate(), LocalDateTime.now().toLocalDate()).getDays();
            int totalClicks = getTotalClicksFromStats(shibUrlStats);
-           double clicksPerDay = getClicksPerDayFromStas(shibUrlStats);
+           double clicksPerDay = getClicksPerDayFromStas(shibUrlStats, existingDays);
            List<Visitor> visitors = getJoinnedListOfVisitors(shibUrlStats);
            Map<String, Integer> visitorsByOs = groupVisitorsByOs(visitors);
 
@@ -106,13 +106,13 @@ public class AnalyticsService {
                 .sum();
     }
 
-    private double getClicksPerDayFromStas(Stats s) {
-       return s.getDailyStats()
+    private double getClicksPerDayFromStas(Stats s, int existingDays) {
+       return (double) s.getDailyStats()
                 .stream()
                 .map(dailyStats -> dailyStats.getVisits())
                 .mapToInt(i -> i.intValue())
-                .average()
-                .getAsDouble();
+               .sum() / existingDays;
+
     }
 
     private List<Visitor> getJoinnedListOfVisitors(Stats s){
