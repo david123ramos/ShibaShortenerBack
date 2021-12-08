@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Period;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -68,7 +69,7 @@ public class AnalyticsService {
 
        if(shibUrlStats != null) {
 
-           int existingDays = shibUrlStats.getDailyStats().size();
+           int existingDays = Period.between(LocalDateTime.now().toLocalDate(), LocalDateTime.parse(shibUrlStats.getCreatedAt()).toLocalDate()).getDays();
            int totalClicks = getTotalClicksFromStats(shibUrlStats);
            double clicksPerDay = getClicksPerDayFromStas(shibUrlStats);
            List<Visitor> visitors = getJoinnedListOfVisitors(shibUrlStats);
