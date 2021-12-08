@@ -69,7 +69,7 @@ public class AnalyticsService {
 
        if(shibUrlStats != null) {
 
-           int existingDays = Period.between(LocalDateTime.now().toLocalDate(), LocalDateTime.parse(shibUrlStats.getCreatedAt()).toLocalDate()).getDays();
+           int existingDays = Period.between(LocalDateTime.parse(shibUrlStats.getCreatedAt()).toLocalDate(), LocalDateTime.now().toLocalDate()).getDays();
            int totalClicks = getTotalClicksFromStats(shibUrlStats);
            double clicksPerDay = getClicksPerDayFromStas(shibUrlStats);
            List<Visitor> visitors = getJoinnedListOfVisitors(shibUrlStats);
